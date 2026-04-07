@@ -1,0 +1,22 @@
+# Optional: use when you do not have local MySQL. App .env needs MYSQL_PORT=3307 and MYSQL_PASSWORD=blogroot
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: personal-blog-mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: blogroot
+      MYSQL_DATABASE: personal_blog
+    volumes:
+      - personal_blog_mysql_data:/var/lib/mysql
+      - ./server/scripts/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pblogroot"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  personal_blog_mysql_data:

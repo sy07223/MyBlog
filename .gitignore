@@ -1,0 +1,48 @@
+# 依赖
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# 构建产物
+client/dist/
+*.tsbuildinfo
+
+# 环境变量与密钥（切勿提交）
+.env
+.env.*
+!.env.example
+!client/.env.example
+server/.env
+client/.env
+client/.env.local
+client/.env.*.local
+
+# 本地个性化资源（头像大图、视频背景、真实二维码等，按需在本地放置）
+client/public/*.jpg
+client/public/*.jpeg
+client/public/*.png
+client/public/*.webp
+client/public/*.mp4
+client/public/*.webm
+!client/public/favicon.svg
+!client/public/icons.svg
+!client/public/avatar.svg
+!client/public/blog-bg.svg
+
+# IDE / 系统
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+.DS_Store
+
+# 日志与临时
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# 数据库导出（若有）
+*.sql.gz
+dump.sql

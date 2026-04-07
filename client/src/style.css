@@ -1,0 +1,43 @@
+/* 全局基础：博客全宽布局 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#app {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  min-height: 100vh;
+  text-align: initial;
+  border: none;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(140, 174, 166, 0.35);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(140, 174, 166, 0.55);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(120, 120, 120, 0.4);
+}
