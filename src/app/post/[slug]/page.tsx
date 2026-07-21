@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getPostBySlug, getPublishedPosts } from "@/lib/posts";
 import { Metadata } from "next";
+import { serialize } from "next-mdx-remote-client/serialize";
 import PostContent from "@/components/PostContent";
 
 interface PostPageProps {
@@ -40,6 +41,20 @@ export default async function PostPage({ params }: PostPageProps) {
     notFound();
   }
 
+  const mdxSource = await serialize({
+    source: post.content,
+    options: {
+      mdxOptions: {
+        remarkPlugins: [],
+        rehypePlugins: [],
+      },
+    },
+  });
+
+  if ("error" in mdxSource) {
+    throw mdxSource.error;
+  }
+
   return (
     <div className="post-detail">
       <article className="glass-panel">
@@ -61,7 +76,7 @@ export default async function PostPage({ params }: PostPageProps) {
             </div>
           )}
         </header>
-        <PostContent content={post.content} />
+        <PostContent mdxSource={mdxSource} />
       </article>
     </div>
   );

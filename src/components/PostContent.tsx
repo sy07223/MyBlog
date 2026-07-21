@@ -1,42 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
+import { MDXClient } from "next-mdx-remote-client";
+import type { MDXClientProps } from "next-mdx-remote-client";
 
 interface PostContentProps {
-  content: string;
+  mdxSource: MDXClientProps;
 }
 
-export default function PostContent({ content }: PostContentProps) {
-  const [mdxSource, setMdxSource] = useState<MDXRemoteSerializeResult | null>(
-    null
-  );
-
-  useEffect(() => {
-    async function compileMdx() {
-      try {
-        const compiled = await serialize(content, {
-          mdxOptions: {
-            remarkPlugins: [],
-            rehypePlugins: [],
-          },
-        });
-        setMdxSource(compiled);
-      } catch (e) {
-        console.error("MDX compile error:", e);
-      }
-    }
-    compileMdx();
-  }, [content]);
-
-  if (!mdxSource) {
-    return <div className="post-content">加载中…</div>;
-  }
-
+export default function PostContent({ mdxSource }: PostContentProps) {
   return (
     <div className="post-content">
-      <MDXRemote {...mdxSource} />
+      <MDXClient {...mdxSource} />
     </div>
   );
 }
