@@ -1,0 +1,25 @@
+{
+  "name": "blog-server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "seed": "node scripts/seed.js",
+    "migrate": "node scripts/migrate-tags.js",
+    "db:init": "node scripts/init-db.js",
+    "db:seed": "node scripts/seed.js",
+    "db:setup": "node scripts/init-db.js && node scripts/seed.js",
+    "db:migrate-guestbook": "node scripts/migrate-guestbook.js",
+    "db:migrate-guestbook-v2": "node scripts/migrate-guestbook-v2.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.12.0"
+  }
+}
