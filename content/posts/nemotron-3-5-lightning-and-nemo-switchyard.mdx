@@ -1,0 +1,51 @@
+---
+title: NVIDIA 发布 Nemotron 3.5 Lightning：轻量高效的执行层模型与智能路由新方案
+slug: nemotron-3-5-lightning-and-nemo-switchyard
+tags:
+  - NVIDIA
+  - Nemotron
+  - MoE
+  - Agentic AI
+  - 模型路由
+published: true
+created_at: '2026-08-12T06:59:40.000Z'
+source_url: >-
+  https://www.marktechpost.com/2026/08/11/nvidia-ai-releases-nemotron-3-5-lightning-and-nemo-switchyard/
+source_name: MarkTechPost AI
+updated_at: '2026-08-12T07:19:44.011Z'
+---
+长期运行的 AI Agent 大部分时间都花在工具调用、结果验证和子代理委派这类执行层任务上。如果每一步都交给顶级推理模型，成本和延迟都会快速膨胀。NVIDIA 最近发布的两项开源技术——Nemotron 3.5 Lightning 和 NeMo Switchyard——正是针对这个问题提出的方案。
+
+## 执行层，而非规划层
+
+Nemotron 3.5 Lightning 是一个 30B 总参数的混合专家模型（MoE），但每个 token 只激活 3B 参数。它采用 Mamba-2 + MoE + Attention 的混合架构，上下文窗口达到 1M token。NVIDIA 指出，这个模型的目标是承接 Agent 工作流中高频、重复的执行动作，而规划、编排等任务仍然交给更大规模的前沿模型，例如 Nemotron 3 Ultra。这种分工让前端模型不用再为每一小步支付高额算力。
+
+模型基于超过 20 万亿 token 进行预训练，并使用了 NVFP4 量化方案。NVIDIA 报告称，与同尺寸模型相比，它的输出速度最多可提升 4 倍。在 PinchBench 基准上，它完成 10,000 个任务的速度比 Qwen3.6 35B 快 30%，同时准确率为 86%。资料中未说明这些结果是否经过独立机构复现，建议谨慎看待厂商自报数据。
+
+## 速度来自哪里？
+
+Lightning 的速度主要靠两个机制。第一是推测解码（Speculative Decoding）。模型在预训练阶段就内置了多 token 预测能力，并附带两个外部草稿模型：DSpark 和 DFlash。DSpark 是半自回归模型，适合 DGX Spark 和低并发数据中心；DFlash 则基于轻量块扩散模型。草稿模型先生成一批 token，再由主模型一次验证，从而节省推理时间。
+
+第二是量化。NVIDIA 同时提供 BF16 和 NVFP4 检查点，NVFP4 版本能原生支持 Blackwell 和 Hopper 架构，并通过 W4A16 内核扩展到 Ampere。官方公布的模型卡数据显示，BF16/NVFP4 两个版本在 MMLU Pro 上分别为 81.94/81.62，GPQA Diamond 为 75.44/75.57，SWE-bench Verified 为 51.56/52.80，Terminal-Bench 2.1 为 24.58/23.46。推荐的采样参数是 temperature 1.0、top_p 0.95。
+
+## 部署与许可
+
+Nemotron 3.5 Lightning 采用宽松的 OpenMDW-1.1 许可，权重、训练数据和配方全部开放，并允许商用。NVIDIA 声称单块 DGX Spark（GB10）或单块 H100 即可运行，这让个人开发者也能像企业一样实验。此外，模型可通过 Baseten、Together AI、Nebius 等平台托管，或完全部署在本地。资料还提到支持通过 Ollama、LM Studio、llama.cpp 和 Unsloth 使用。
+
+从已公开的行业案例看，CrowdStrike、Harvey、CodeRabbit、Fastino Labs 和 Lila Sciences 等公司正在将其用于网络安全、法律、编码、金融和医疗健康场景。应用范围包括工具调用、代码审查路由、日志分类、合同解析和长上下文检索等。
+
+## NeMo Switchyard：让模型各司其职
+
+与 Lightning 配套发布的 NeMo Switchyard 是一个开源路由库，它能把 Agent 工作流的每一步自动分配给最合适的模型。Switchyard 提供了多种免调优路由器：例如带会话亲和性的 LLM 分类器、读取最近工具调用的阶段路由器，以及从廉价模型开始、遇到持续困难再升级的升级路由器。还有一个可调优的 prefill 路由器，能从模型残差流中学习并预测哪个候选模型会成功。它的参考服务器兼容 OpenAI、Anthropic 和 Responses API。
+
+Switchyard 的实际效果有两个公开案例。LangChain 在 145 个多轮 agentic 任务上做了基准测试，在 Lightning 与 Claude Opus 4.8 之间使用升级路由器，相比只用前沿模型，成本降低了 74%，只有 7% 的调用会转发给前沿模型，准确率大约损失 6 个百分点。另一个案例是 Cognition 在 Devin Desktop 中实现了分段路由，在 FrontierCode Main 基准上，路由在 Opus 5 和 Kimi K2.7 之间，达到 50.6% 的成绩，平均成本 3.11 美元，比只用 Opus 5 的准确率低不到 2.8 个百分点，而平均成本降低了约 28%。
+
+## 我的观察
+
+NVIDIA 这次没有试图用一个巨大的模型包揽所有任务，而是把“执行层”单独拆出来优化。这种思路对 Agent 应用很务实——毕竟大部分 token 都消耗在机械性步骤上。再加上 Switchyard 做智能路由，整个系统就像一个团队，有人负责思考，有人负责跑腿，成本自然降下来。不过，测试数据和实际生产环境之间仍有距离，具体收益还需要在自己业务里验证。资料中也没有说明 Lightning 在中文等非英语任务上的表现，这点可能需要进一步测试。
+
+总的来说，这两个项目为构建高效 Agent 提供了新思路：与其在所有环节都追求最强模型，不如让模型分工协作，用路由把成本控制在合理范围内。对于想降低 Agent 推理成本的开发者来说，值得上手试一试。
+
+---
+
+> 原文：[MarkTechPost AI](https://www.marktechpost.com/2026/08/11/nvidia-ai-releases-nemotron-3-5-lightning-and-nemo-switchyard/)
