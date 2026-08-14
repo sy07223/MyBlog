@@ -61,6 +61,7 @@ async function remove(id) {
         />
         <RouterLink to="/">站点首页</RouterLink>
         <RouterLink to="/admin/guestbook">留言管理</RouterLink>
+        <RouterLink to="/admin/projects">项目管理</RouterLink>
         <RouterLink to="/admin/posts/new">New</RouterLink>
         <button type="button" class="ghost" @click="logout">Logout</button>
       </div>

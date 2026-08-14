@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import { getPublishedPosts, getAllTags, filterPosts } from "@/lib/posts";
+import { getProjects } from "@/lib/projects";
 import PostList from "@/components/PostList";
 
-export const dynamic = "force-dynamic";
-
-export default function HomePage() {
+export default async function HomePage() {
   const allPosts = getPublishedPosts();
   const allTags = getAllTags("post");
   const essayTags = getAllTags("essay");
+  const projects = await getProjects();
 
   const { items, total, pages } = filterPosts(allPosts, {
     page: 1,
@@ -30,6 +30,7 @@ export default function HomePage() {
         initialPages={pages}
         allTags={allTags}
         essayTags={essayTags}
+        projects={projects}
       />
     </Suspense>
   );

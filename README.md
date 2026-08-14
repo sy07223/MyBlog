@@ -55,13 +55,83 @@ created_at: 2024-01-01
 npm run dev
 ```
 
-打开 <http://localhost:3000>
+打开 <http://localhost:3100>
+
+如果要让公开端读取后台管理的项目，请在 Next.js 项目的环境变量中设置：
+
+```env
+BLOG_API_URL=http://localhost:3001/api
+```
+
+首次启用项目管理时，在 `server` 目录执行：
+
+```bash
+npm install
+# 复制 env.example 为 .env，并填写 MySQL 配置
+npm run db:migrate-projects
+npm run dev
+```
+
+再在另一个终端启动管理端：
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+然后打开 `http://localhost:5173/admin/projects`，即可新增、编辑、排序、发布或隐藏项目。没有配置 `BLOG_API_URL` 时，公开端会使用 `src/config/site.ts` 中的静态项目作为兜底。
 
 ### 5. 构建
 
 ```bash
 npm run build
 ```
+
+## AI 编辑代理（第一版）
+
+项目现在带有一个本地编辑代理：它可以读取 RSS/文章链接、调用 GPT 生成未发布草稿，并在你确认后把草稿发布到 `content/posts/`。默认不会自动发布，也不会自动推送 Git。
+
+先编辑 `content/agent/sources.json`，再配置 DeepSeek API Key。你刚才发出的旧 Key 已暴露，请先撤销并重新生成；不要把 Key 写进项目文件：
+
+```powershell
+# 在项目根目录创建 .env.local，内容如下；不要提交这个文件
+AI_PROVIDER=deepseek
+DEEPSEEK_API_KEY=新的_DEEPSEEK_API_KEY
+DEEPSEEK_MODEL=deepseek-v4-flash
+```
+
+也可以把 `AI_PROVIDER` 改成 `openai`，使用 `OPENAI_API_KEY` 和 `OPENAI_MODEL`。
+
+如果希望代理自动发布，可在 `.env.local` 增加：
+
+```env
+OBSIDIAN_VAULT_PATH=C:/Users/30848/Documents/Obsidian Vault
+AUTO_PUBLISH=1
+AUTO_COMMIT=1
+AUTO_PUSH=1
+```
+
+自动发布仍会先经过来源、隐私、危险操作和高风险建议检查；被拦截的文章会留在 `content/drafts/`。通过检查的文章会同步到 Obsidian 的 `AI Agent/Published/`。
+
+然后执行：
+
+```bash
+npm run agent -- collect
+npm run agent -- draft --all
+npm run agent -- preview
+npm run agent -- preview your-slug
+```
+
+确认草稿后发布：
+
+```bash
+npm run agent -- publish your-slug
+# 需要同时创建 Git commit 时：
+npm run agent -- publish your-slug --commit
+```
+
+`npm run agent -- run` 会采集并生成草稿，但永远不会发布。`OPENCLAW.md` 里有一份可以直接交给 OpenClaw 的操作规则。
 
 ## 部署到 Vercel
 

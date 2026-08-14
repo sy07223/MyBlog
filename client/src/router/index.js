@@ -26,6 +26,12 @@ const routes = [
     component: () => import('../views/AdminGuestbook.vue'),
   },
   {
+    path: '/admin/projects',
+    name: 'adminProjects',
+    meta: { requiresAuth: true },
+    component: () => import('../views/AdminProjects.vue'),
+  },
+  {
     path: '/admin/posts/new',
     name: 'adminNew',
     meta: { requiresAuth: true },
@@ -36,6 +42,18 @@ const routes = [
     name: 'adminEdit',
     meta: { requiresAuth: true },
     component: () => import('../views/AdminEdit.vue'),
+  },
+  {
+    path: '/admin/projects/new',
+    name: 'adminProjectNew',
+    meta: { requiresAuth: true },
+    component: () => import('../views/AdminProjectEdit.vue'),
+  },
+  {
+    path: '/admin/projects/:id',
+    name: 'adminProjectEdit',
+    meta: { requiresAuth: true },
+    component: () => import('../views/AdminProjectEdit.vue'),
   },
   {
     path: '/:pathMatch(.*)*',

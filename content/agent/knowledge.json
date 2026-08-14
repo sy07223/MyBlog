@@ -1,0 +1,71 @@
+{
+  "updated_at": "2026-08-12T07:15:39.136Z",
+  "entries": [
+    {
+      "title": "字节跳动Seed发布SeedRealtime：一个会看、会听、会说的原生全双工多模态大模型",
+      "source_url": "https://www.marktechpost.com/2026/08/09/bytedance-seed-introduces-seedrealtime-a-native-audio-visual-full-duplex-llm-that-watches-listens-and-speaks-in-one-model/",
+      "source_name": "MarkTechPost AI",
+      "published_at": "2026-08-10T05:48:17.000Z",
+      "tags": [
+        "AI",
+        "多模态",
+        "大模型",
+        "ByteDance",
+        "全双工"
+      ],
+      "excerpt": "字节跳动Seed团队推出SeedRealtime，一个原生音视频全双工大模型，将音频、视频和文本统一在单一架构中，支持连续多模态流的实时交互。官方演示了跨模态身份绑定、主动发言等能力，但尚未开放技术报告或API。",
+      "key_points": [
+        "SeedRealtime是字节跳动Seed团队推出的原生音视频全双工大语言模型，将音频、视频和文本统一在一个端到端架构中，支持连续多模态流的实时交互。",
+        "它通过在一个模型内并行运行感知、理解、决策与表达，避免传统级联系统（ASR→VLM→TTS）带来的延迟和信息损失，并将轮次控制内化，不再依赖外部语音活动检测器。",
+        "官方演示展示了四种关键能力：跨模态身份绑定、基于保留指令的主动发言、根据视觉状态进行纠正，以及干扰抑制和屏幕外记忆。",
+        "目前SeedRealtime已在字节的豆包App中上线，但未发布技术报告、参数规模、开放权重或面向第三方的API，外部团队暂时无法集成。",
+        "资料未给出基准测试和延迟数据；ByteDance声称内部人类评估显示节奏问题比级联方案减少一半。"
+      ],
+      "learned_at": "2026-08-12T07:15:39.136Z"
+    },
+    {
+      "title": "Meta 再推 Muse Glimmer：本地化、智能体、多模态，并拥抱开源",
+      "source_url": "https://huggingface.co/blog/muse-glimmer",
+      "source_name": "Hugging Face Blog",
+      "published_at": "2026-08-10T00:00:00.000Z",
+      "tags": [
+        "Meta",
+        "Muse Glimmer",
+        "开源",
+        "多模态",
+        "AI"
+      ],
+      "excerpt": "Meta 发布了名为 Muse Glimmer 的新模型，强调本地化、智能体、多模态与开源。但目前资料未提供具体技术细节。",
+      "key_points": [
+        "Meta 发布了名为 Muse Glimmer 的新模型，标题称其具备本地化、智能体、多模态和开源特性。",
+        "Hugging Face 博客的摘要表达了 Meta 通过开源和开放科学推进 AI 民主化的愿景。",
+        "目前资料未提供 Muse Glimmer 的具体技术参数、许可证和性能细节。",
+        "本地化与多模态智能体的结合可能有利于隐私保护和离线使用，但这属于个人推测。",
+        "在 AI 语境中，“开源”可能仅指权重开放，而数据与代码不一定公开。"
+      ],
+      "learned_at": "2026-08-12T07:14:36.740Z"
+    },
+    {
+      "title": "Meta 发布 Muse Glimmer：30B 开源代理模型，单张消费级 GPU 可运行",
+      "source_url": "https://www.marktechpost.com/2026/08/10/meta-ai-releases-muse-glimmer/",
+      "source_name": "MarkTechPost AI",
+      "published_at": "2026-08-10T15:11:51.000Z",
+      "tags": [
+        "AI",
+        "开源模型",
+        "代理模型",
+        "Meta",
+        "本地部署"
+      ],
+      "excerpt": "Meta 推出 Muse Glimmer，一个 30B 参数的开源代理模型，通过 4-bit 量化和 DFlash 投机解码，可在 24GB 显存的消费级 GPU 上高效运行。",
+      "key_points": [
+        "Muse Glimmer 是 Meta 发布的 30B 多模态代理模型，Apache 2.0 开源，从 Muse Spark 蒸馏而来，可在 24GB 消费级 GPU 上运行。",
+        "通过 4-bit 量化将语言模型压缩至 20GB 以下，K-Quant-17GB 精度损失约 1.0%，K-Quant-Dynamic 损失 0.2%。",
+        "DFlash 投机解码以 16-token 块进行，在 RTX 5090 上实现 3.1 倍解码加速，吞吐达 233.4 tok/s。",
+        "在 MCP Atlas、DeepSearch QA、SWE-Bench Pro 等代理基准上领先 Gemma4-31B 和 Qwen3.6-27B，但 OSWorld 和 TerminalBench 上落后于 Qwen。",
+        "支持文本+图像输入，上下文 131K+，知识截止 2026 年 1 月，训练采用蒸馏和强化学习三阶段流程。"
+      ],
+      "learned_at": "2026-08-12T07:13:14.291Z"
+    }
+  ]
+}

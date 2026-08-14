@@ -22,6 +22,14 @@ export async function GET() {
     <loc>${escapeXml(site)}/guestbook</loc>
     <changefreq>weekly</changefreq>
   </url>`,
+    `  <url>
+    <loc>${escapeXml(site)}/about</loc>
+    <changefreq>monthly</changefreq>
+  </url>`,
+    `  <url>
+    <loc>${escapeXml(site)}/projects</loc>
+    <changefreq>monthly</changefreq>
+  </url>`,
     ...posts.map((post) => {
       const loc = `${site}/post/${encodeURIComponent(post.slug)}`;
       const d = post.updated_at || post.created_at;

@@ -63,6 +63,7 @@ onMounted(load)
       <h1>留言管理</h1>
       <div class="actions">
         <RouterLink to="/admin/posts">文章管理</RouterLink>
+        <RouterLink to="/admin/projects">项目管理</RouterLink>
         <RouterLink to="/">站点首页</RouterLink>
         <button type="button" class="ghost" @click="logout">Logout</button>
       </div>

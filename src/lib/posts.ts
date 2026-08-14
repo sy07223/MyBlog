@@ -107,6 +107,27 @@ export function getPostBySlug(slug: string): Post | null {
   return posts.find((p) => p.slug === slug) || null;
 }
 
+export function getRelatedPosts(post: Post, limit = 3): Post[] {
+  return getPublishedPosts()
+    .filter((candidate) => candidate.slug !== post.slug)
+    .map((candidate) => {
+      const sharedTags = candidate.tags.filter((tag) =>
+        post.tags.includes(tag)
+      ).length;
+
+      return { candidate, sharedTags };
+    })
+    .sort((a, b) => {
+      if (b.sharedTags !== a.sharedTags) return b.sharedTags - a.sharedTags;
+      return (
+        new Date(b.candidate.created_at).getTime() -
+        new Date(a.candidate.created_at).getTime()
+      );
+    })
+    .slice(0, limit)
+    .map(({ candidate }) => candidate);
+}
+
 export function getAllTags(scope?: "essay" | "post"): string[] {
   const posts = getPublishedPosts();
   const set = new Set<string>();

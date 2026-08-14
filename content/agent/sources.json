@@ -1,0 +1,29 @@
+{
+  "feeds": [
+    {
+      "name": "OpenAI News",
+      "url": "https://openai.com/news/rss.xml",
+      "max_items": 15,
+      "tags": ["AI Agent", "OpenAI"]
+    },
+    {
+      "name": "Hugging Face Blog",
+      "url": "https://huggingface.co/blog/feed.xml",
+      "max_items": 15,
+      "tags": ["AI Agent", "开源模型"]
+    },
+    {
+      "name": "arXiv cs.AI",
+      "url": "https://export.arxiv.org/rss/cs.AI",
+      "max_items": 20,
+      "tags": ["AI Agent", "论文"]
+    },
+    {
+      "name": "MarkTechPost AI",
+      "url": "https://www.marktechpost.com/feed/",
+      "max_items": 15,
+      "tags": ["AI Agent", "技术资讯"]
+    }
+  ],
+  "articles": []
+}

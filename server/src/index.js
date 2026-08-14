@@ -3,6 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import authRoutes from './routes/auth.js'
 import postRoutes from './routes/posts.js'
+import projectRoutes from './routes/projects.js'
 import guestbookRoutes, { guestbookAdminRouter } from './routes/guestbook.js'
 
 const app = express()
@@ -28,6 +29,7 @@ app.get('/', (_req, res) => {
 app.get('/api/health', (_req, res) => res.json({ ok: true }))
 app.use('/api/auth', authRoutes)
 app.use('/api', postRoutes)
+app.use('/api', projectRoutes)
 app.use('/api', guestbookRoutes)
 app.use('/api/admin', guestbookAdminRouter)
 

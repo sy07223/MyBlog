@@ -1,18 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  SITE_DISPLAY_NAME,
-  SITE_WELCOME_NICK,
-  SITE_TAGLINE,
-  SITE_BIO_PARAGRAPHS,
-  SITE_AVATAR_URL,
-  SITE_CONTACT_QR,
-  SITE_SOCIAL_LINKS,
-} from "@/config/site";
+import { SITE_TAGLINE } from "@/config/site";
 import type { PostListItem } from "@/lib/posts";
+import type { Project } from "@/lib/projects";
+import ProfilePanel from "@/components/ProfilePanel";
 
 interface PostListProps {
   initialPosts: PostListItem[];
@@ -20,6 +14,7 @@ interface PostListProps {
   initialPages: number;
   allTags: string[];
   essayTags: string[];
+  projects: Project[];
 }
 
 const tagGradients = [
@@ -41,6 +36,7 @@ export default function PostList({
   initialPages,
   allTags,
   essayTags,
+  projects,
 }: PostListProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,15 +45,17 @@ export default function PostList({
   const [total, setTotal] = useState(initialTotal);
   const [pages, setPages] = useState(initialPages);
   const [loading, setLoading] = useState(false);
-  const [searchDraft, setSearchDraft] = useState("");
   const [tagsExpanded, setTagsExpanded] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
   const q = searchParams.get("q") || "";
   const essay = searchParams.get("essay") === "1";
-  const tagParams = searchParams.getAll("tag");
-
-  const activeTags = tagParams.filter(Boolean);
+  const queryString = searchParams.toString();
+  const activeTags = useMemo(
+    () => new URLSearchParams(queryString).getAll("tag").filter(Boolean),
+    [queryString]
+  );
   const isEssayMode = essay || activeTags.includes("随笔");
   const TAG_CLOUD_COLLAPSE_AT = 14;
 
@@ -74,40 +72,42 @@ export default function PostList({
   const showHero =
     !isEssayMode && activeTags.length === 0 && !q && page === 1;
 
-  const hasContactLinks =
-    SITE_CONTACT_QR.length > 0 || SITE_SOCIAL_LINKS.length > 0;
-
-  const fetchPosts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.set("page", String(page));
-      params.set("limit", "8");
-      if (q) params.set("q", q);
-      if (isEssayMode) params.set("essay", "1");
-      for (const tag of activeTags) {
-        if (tag !== "随笔") params.append("tag", tag);
-      }
-
-      const res = await fetch(`/api/posts?${params.toString()}`);
-      const data = await res.json();
-      setPosts(data.items);
-      setTotal(data.total);
-      setPages(data.pages);
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false);
+  const apiQuery = useMemo(() => {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("limit", "8");
+    if (q) params.set("q", q);
+    if (isEssayMode) params.set("essay", "1");
+    for (const tag of activeTags) {
+      if (tag !== "随笔") params.append("tag", tag);
     }
+    return params.toString();
   }, [page, q, isEssayMode, activeTags]);
 
   useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts]);
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/posts?${apiQuery}`, {
+          signal: controller.signal,
+        });
+        const data = await res.json();
+        setPosts(data.items);
+        setTotal(data.total);
+        setPages(data.pages);
+      } catch {
+        if (!controller.signal.aborted) setLoading(false);
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }, 0);
 
-  useEffect(() => {
-    setSearchDraft(q);
-  }, [q]);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [apiQuery]);
 
   function buildQuery(
     newPage: number,
@@ -127,11 +127,12 @@ export default function PostList({
   }
 
   function applySearch() {
+    const searchDraft = searchInputRef.current?.value.trim() || "";
     router.push(buildQuery(1, searchDraft, activeTags, isEssayMode));
   }
 
   function clearFilters() {
-    setSearchDraft("");
+    if (searchInputRef.current) searchInputRef.current.value = "";
     if (isEssayMode) {
       router.push("/?essay=1#blog-posts");
     } else {
@@ -152,6 +153,10 @@ export default function PostList({
 
   const showClearFilters =
     q || (isEssayMode ? activeTags.length > 0 : activeTags.length > 0);
+
+  const selectedProject = projects[0];
+  const selectedProjectHref =
+    selectedProject?.demo_url || selectedProject?.href || "/projects";
 
   const emptyListHint = (() => {
     if (loading) return "";
@@ -176,158 +181,137 @@ export default function PostList({
   return (
     <div className="blog-list-view">
       {showHero && (
-        <section className="hero-welcome" aria-label="欢迎">
-          <div className="hero-welcome-inner">
-            <h1 className="hero-welcome-title">
-              欢迎来到
-              <span className="hero-welcome-nick">{SITE_WELCOME_NICK}</span>
-              的博客
-            </h1>
-          </div>
-          <button
-            type="button"
-            className="hero-scroll-cue"
-            aria-label="查看正文"
-            onClick={() =>
-              document
-                .getElementById("blog-main")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" })
-            }
+        <div className="home-top-grid">
+          <section className="hero-welcome" aria-label="欢迎">
+            <div className="hero-welcome-inner">
+              <p className="hero-welcome-kicker">WEB · PRODUCT · AGENT</p>
+              <h1 className="hero-welcome-title">
+                你好，我是 <span className="hero-welcome-nick">Sy</span>
+              </h1>
+              <p className="hero-welcome-description">{SITE_TAGLINE}</p>
+              <p className="hero-welcome-summary">
+                用代码构建产品，也记录关于 AI Agent、设计与开发的探索。
+              </p>
+              <div className="hero-actions">
+                <Link href="/projects" className="btn hero-primary">
+                  查看项目 <span aria-hidden="true">↗</span>
+                </Link>
+                <Link href="#blog-posts" className="btn ghost hero-secondary">
+                  阅读文章
+                </Link>
+              </div>
+            </div>
+          </section>
+          <ProfilePanel
+            initialPosts={initialPosts}
+            initialTotal={initialTotal}
+            allTags={allTags}
+            q={q}
+            isEssayMode={isEssayMode}
+            showClearFilters={showClearFilters}
+            tagCloudTags={tagCloudTags}
+            displayedTagCloudTags={displayedTagCloudTags}
+            activeTags={activeTags}
+            tagCloudOverflow={tagCloudOverflow}
+            tagsExpanded={tagsExpanded}
+            searchInputRef={searchInputRef}
+            onApplySearch={applySearch}
+            onClearFilters={clearFilters}
+            onToggleTag={toggleTag}
+            onToggleTags={() => setTagsExpanded(!tagsExpanded)}
+          />
+        </div>
+      )}
+
+      {showHero && initialPosts[0] && (
+        <div className="hero-feature-wrap">
+          <Link
+            href={`/post/${initialPosts[0].slug}`}
+            className="hero-feature glass-card"
           >
-            <span className="hero-scroll-arrow" aria-hidden="true">
-              ⌄
+            <div className="hero-feature-label">
+              <span className="status-dot" aria-hidden="true" />
+              最新文章
+            </div>
+            <div className="hero-feature-copy">
+              <h2>{initialPosts[0].title}</h2>
+              <p>{initialPosts[0].excerpt || "打开文章，看看最近写下了什么。"}</p>
+            </div>
+            <span className="hero-feature-arrow" aria-hidden="true">
+              ↗
             </span>
-          </button>
-          <div className="hero-welcome-fade" aria-hidden="true" />
-        </section>
+          </Link>
+        </div>
       )}
 
       <div
         id="blog-main"
         className={`inner ${showHero ? "inner-after-hero" : ""}`}
       >
-        <div className="intro glass-panel">
-          <header className="blog-list-header profile-header">
-            {SITE_AVATAR_URL && (
-              <img
-                className="profile-avatar"
-                src={SITE_AVATAR_URL}
-                width={96}
-                height={96}
-                alt=""
-              />
-            )}
-            <div className="profile-text">
-              <h2 className="profile-site-heading">{SITE_DISPLAY_NAME}</h2>
-              {SITE_TAGLINE && (
-                <p className="profile-tagline">{SITE_TAGLINE}</p>
-              )}
-              {SITE_BIO_PARAGRAPHS.map((line, i) => (
-                <p key={i} className="profile-bio">
-                  {line}
-                </p>
-              ))}
-              {hasContactLinks && (
-                <div className="profile-links">
-                  {SITE_CONTACT_QR.map((c) => (
-                    <div key={c.label} className="qr-chip-wrap">
-                      <button type="button" className="profile-link qr-trigger">
-                        {c.label}
-                      </button>
-                      <div className="qr-popover" role="dialog">
-                        <img
-                          className="qr-popover-img"
-                          src={c.qr}
-                          width={168}
-                          height={168}
-                          loading="lazy"
-                          alt={`${c.label}二维码`}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  {SITE_SOCIAL_LINKS.map((link) => (
-                    <a
-                      key={link.href + link.label}
-                      className="profile-link"
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {link.label}
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-          </header>
-
-          <div className="toolbar">
-            <div className="search-row">
-              <input
-                value={searchDraft}
-                onChange={(e) => setSearchDraft(e.target.value)}
-                className="search-input"
-                type="search"
-                placeholder={
-                  isEssayMode ? "搜索随笔正文…" : "搜索标题或正文…"
-                }
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    applySearch();
-                  }
-                }}
-              />
-              <button type="button" className="btn" onClick={applySearch}>
-                {isEssayMode ? "搜随笔" : "搜索"}
-              </button>
-              {showClearFilters && (
-                <button
-                  type="button"
-                  className="btn ghost"
-                  onClick={clearFilters}
-                >
-                  清除筛选
-                </button>
-              )}
-            </div>
-
-            {tagCloudTags.length > 0 && (
-              <div className="tag-cloud-wrap">
-                <div className="tag-cloud">
-                  <span className="tag-label">
-                    {isEssayMode
-                      ? "随笔里的标签（可多选）"
-                      : "文章标签（可多选）"}
-                  </span>
-                  {displayedTagCloudTags.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      className={`cloud-tag ${
-                        activeTags.includes(t) ? "on" : ""
-                      }`}
-                      onClick={() => toggleTag(t)}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-                {tagCloudOverflow && (
-                  <button
-                    type="button"
-                    className="tag-cloud-toggle"
-                    onClick={() => setTagsExpanded(!tagsExpanded)}
-                  >
-                    {tagsExpanded
-                      ? "收起标签"
-                      : `展开全部（${tagCloudTags.length} 个）`}
-                  </button>
-                )}
+      {showHero && selectedProject && (
+          <section className="home-project" aria-labelledby="home-project-title">
+            <div className="section-heading">
+              <div>
+                <p className="section-eyebrow">SELECTED WORK</p>
+                <h2 id="home-project-title">正在做的项目</h2>
               </div>
-            )}
+              <Link href="/projects" className="section-link">
+                查看全部项目 →
+              </Link>
+            </div>
+            <Link
+              href={selectedProjectHref}
+              className="home-project-card"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div className="home-project-mark" aria-hidden="true">
+                SY
+              </div>
+              <div className="home-project-copy">
+                <p className="project-status">{selectedProject.status}</p>
+                <h3>{selectedProject.name}</h3>
+                <p>{selectedProject.description}</p>
+                <div className="project-tags">
+                  {selectedProject.tags.map((tag) => (
+                    <span key={tag}>{tag}</span>
+                  ))}
+                </div>
+              </div>
+              <span className="home-project-arrow" aria-hidden="true">
+                ↗
+              </span>
+            </Link>
+          </section>
+        )}
+
+        {!showHero && (
+          <ProfilePanel
+            initialPosts={initialPosts}
+            initialTotal={initialTotal}
+            allTags={allTags}
+            q={q}
+            isEssayMode={isEssayMode}
+            showClearFilters={showClearFilters}
+            tagCloudTags={tagCloudTags}
+            displayedTagCloudTags={displayedTagCloudTags}
+            activeTags={activeTags}
+            tagCloudOverflow={tagCloudOverflow}
+            tagsExpanded={tagsExpanded}
+            searchInputRef={searchInputRef}
+            onApplySearch={applySearch}
+            onClearFilters={clearFilters}
+            onToggleTag={toggleTag}
+            onToggleTags={() => setTagsExpanded(!tagsExpanded)}
+          />
+        )}
+
+        <div className="posts-section-heading">
+          <div>
+            <p className="section-eyebrow">FROM THE NOTEBOOK</p>
+            <h2>{isEssayMode ? "随笔" : "最近的文章"}</h2>
           </div>
+          <span className="posts-count">{total} 篇记录</span>
         </div>
 
         <section

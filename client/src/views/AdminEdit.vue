@@ -98,6 +98,7 @@ async function save() {
     <header class="bar">
       <RouterLink to="/admin/posts">Back</RouterLink>
       <RouterLink to="/admin/guestbook">留言</RouterLink>
+      <RouterLink to="/admin/projects">项目</RouterLink>
       <h1>{{ isNew ? 'New post' : 'Edit post' }}</h1>
     </header>
     <p v-if="loading && !isNew && !title" class="muted">Loading...</p>

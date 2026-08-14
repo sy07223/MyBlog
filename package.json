@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --hostname 0.0.0.0 --port 3100",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "agent": "node --env-file-if-exists=.env.local scripts/blog-agent.mjs"
   },
   "dependencies": {
     "@giscus/react": "^3.1.0",
@@ -20,6 +21,7 @@
     "marked": "^18.0.7",
     "next": "16.2.10",
     "next-mdx-remote": "^6.0.0",
+    "openai": "^7.4.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "reading-time": "^1.5.0"

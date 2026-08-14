@@ -11,6 +11,7 @@
     "db:init": "node scripts/init-db.js",
     "db:seed": "node scripts/seed.js",
     "db:setup": "node scripts/init-db.js && node scripts/seed.js",
+    "db:migrate-projects": "node scripts/migrate-projects.js",
     "db:migrate-guestbook": "node scripts/migrate-guestbook.js",
     "db:migrate-guestbook-v2": "node scripts/migrate-guestbook-v2.js"
   },
